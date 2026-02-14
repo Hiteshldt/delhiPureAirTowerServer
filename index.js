@@ -109,7 +109,7 @@ app.get('/api/aqi', async (req, res) => {
         const { time, date } = getIST();
         const customMsg = " Cleans Air Equivalent to 15 Mature Trees - NHAI - CPA ";
 
-        const finalString = `AQI: ${aqiStorage.value ?? "N/A"}   PM2.5: ${aqiStorage.pm25 ?? "N/A"} µg/m³   TEM: ${weatherStorage.temp ?? "N/A"} °C   HUM: ${weatherStorage.humi ?? "N/A"} %   ${time}   ${date}   ${customMsg}`;
+        const finalString = `AQI: ${aqiStorage.value ?? "N/A"}   PM2.5: ${aqiStorage.pm25 ?? "N/A"} µg/m³   TEM: ${weatherStorage.temp ?? "N/A"} °C   HUM: ${weatherStorage.humi ?? "N/A"} %   ${time}  ${date}  ${customMsg}`;
 
         res.json({ data: finalString });
 

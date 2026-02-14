@@ -107,7 +107,7 @@ app.get('/api/aqi', async (req, res) => {
         // LOGIC 3: ASSEMBLE & SEND
         // ===============================================
         const { time, date } = getIST();
-        const customMsg = " - PUREAIR™ CLEANS AIR EQUIVALENT TO 15 MATURE TREES";
+        const customMsg = " - PUREAIR™ CLEANS AIR EQUIVALENT TO 15 MATURE TREES - NHAI - CARBELIM - CPA - ";
 
         const finalString = `AQI: ${aqiStorage.value ?? "N/A"}, PM2.5: ${aqiStorage.pm25 ?? "N/A"} µg/m³, TEMP: ${weatherStorage.temp ?? "N/A"} °C, HUMI: ${weatherStorage.humi ?? "N/A"} %, TIME: ${time}, DATE: ${date}, ${customMsg}`;
 

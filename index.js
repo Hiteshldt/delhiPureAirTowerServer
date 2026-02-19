@@ -124,7 +124,7 @@ app.get('/api/aqi', async (req, res) => {
             humi: weatherStorage.humi ?? "N/A",
             time: time,
             date: date,
-            message: "Cleans Air Equivalent to 15 Mature Trees - NHAI - CPA"
+            message: "PureAir™ Cleans Air Equivalent to 25 Mature Trees - NHAI - CPA"
         });
 
     } catch (error) {

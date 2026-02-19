@@ -114,17 +114,25 @@ app.get('/api/aqi', async (req, res) => {
         // ===============================================
         const { time, date } = getIST();
 
+        const aqi = aqiStorage.value ?? "N/A";
+        const pm25 = aqiStorage.pm25 ?? "N/A";
+        const pm10 = aqiStorage.pm10 ?? "N/A";
+        const co = aqiStorage.co ?? "N/A";
+        const no2 = aqiStorage.no2 ?? "N/A";
+        const temp = weatherStorage.temp ?? "N/A";
+        const humi = weatherStorage.humi ?? "N/A";
+
         res.json({
-            aqi: aqiStorage.value ?? "N/A",
-            pm25: aqiStorage.pm25 ?? "N/A",
-            pm10: aqiStorage.pm10 ?? "N/A",
-            co: aqiStorage.co ?? "N/A",
-            no2: aqiStorage.no2 ?? "N/A",
-            temp: weatherStorage.temp ?? "N/A",
-            humi: weatherStorage.humi ?? "N/A",
+            aqi: aqi !== "N/A" ? `${aqi}` : "N/A",
+            pm25: pm25 !== "N/A" ? `${pm25} µg/m³` : "N/A",
+            pm10: pm10 !== "N/A" ? `${pm10} µg/m³` : "N/A",
+            co: co !== "N/A" ? `${co} µg/m³` : "N/A",
+            no2: no2 !== "N/A" ? `${no2} µg/m³` : "N/A",
+            temp: temp !== "N/A" ? `${temp} °C` : "N/A",
+            humi: humi !== "N/A" ? `${humi} %` : "N/A",
             time: time,
             date: date,
-            message: "PureAir™ Tower Cleans Air Equivalent to 25 Mature Trees - NHAI - CPA"
+            message: "PureAir™ Cleans Air Equivalent to 25 Mature Trees - NHAI - CPA"
         });
 
     } catch (error) {

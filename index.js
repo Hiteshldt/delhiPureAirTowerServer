@@ -29,7 +29,10 @@ const WEATHER_CACHE_DURATION = 20 * 1000;
 let aqiStorage = {
     value: null,
     pm25: null,
-    lastFetch: 0 
+    pm10: null,
+    co: null,
+    no2: null,
+    lastFetch: 0
 };
 
 let weatherStorage = {
@@ -69,8 +72,11 @@ app.get('/api/aqi', async (req, res) => {
                 if (response.data.status === 'ok') {
                     // Update Memory
                     aqiStorage.value = data.aqi;
-                    // Safe check for PM2.5
+                    // Safe check for pollutants
                     aqiStorage.pm25 = (data.iaqi && data.iaqi.pm25) ? data.iaqi.pm25.v : "N/A";
+                    aqiStorage.pm10 = (data.iaqi && data.iaqi.pm10) ? data.iaqi.pm10.v : "N/A";
+                    aqiStorage.co = (data.iaqi && data.iaqi.co) ? data.iaqi.co.v : "N/A";
+                    aqiStorage.no2 = (data.iaqi && data.iaqi.no2) ? data.iaqi.no2.v : "N/A";
                     aqiStorage.lastFetch = now;
                     console.log(`✅ AQI Updated: ${aqiStorage.value}`);
                 } else {
@@ -107,15 +113,23 @@ app.get('/api/aqi', async (req, res) => {
         // LOGIC 3: ASSEMBLE & SEND
         // ===============================================
         const { time, date } = getIST();
-        const customMsg = "Cleans Air Equivalent to 15 Mature Trees - NHAI - CPA";
 
-        const finalString = `AQI: ${aqiStorage.value ?? "N/A"}, PM2.5: ${aqiStorage.pm25 ?? "N/A"} µg/m³, TEM: ${weatherStorage.temp ?? "N/A"}°C, HUM: ${weatherStorage.humi ?? "N/A"} %, ${time} ${date} - ${customMsg}`;
-
-        res.json({ data: finalString });
+        res.json({
+            aqi: aqiStorage.value ?? "N/A",
+            pm25: aqiStorage.pm25 ?? "N/A",
+            pm10: aqiStorage.pm10 ?? "N/A",
+            co: aqiStorage.co ?? "N/A",
+            no2: aqiStorage.no2 ?? "N/A",
+            temp: weatherStorage.temp ?? "N/A",
+            humi: weatherStorage.humi ?? "N/A",
+            time: time,
+            date: date,
+            message: "Cleans Air Equivalent to 15 Mature Trees - NHAI - CPA"
+        });
 
     } catch (error) {
         console.error("🔥 Critical Error:", error.message);
-        res.status(500).json({ data: "Error: System Failure" });
+        res.status(500).json({ error: "System Failure" });
     }
 });
 

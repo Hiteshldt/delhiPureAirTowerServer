@@ -62,28 +62,51 @@ app.get('/api/aqi', async (req, res) => {
         // ===============================================
         // LOGIC 1: FETCH AQI (Only if 15 mins passed OR Data is missing)
         // ===============================================
-        if (now - aqiStorage.lastFetch > AQI_CACHE_DURATION || !aqiStorage.value) {
+        if (now - aqiStorage.lastFetch > AQI_CACHE_DURATION || !aqiStorage.value || aqiStorage.value === "N/A") {
             console.log("⚡ AQI Cache Expired (or empty). Fetching from WAQI...");
+            let fetched = false;
+
+            // Try primary station first
             try {
-                // Using A567673 here
                 const response = await axios.get(`https://api.waqi.info/feed/${STATION_ID}/?token=${WAQI_TOKEN}`, { timeout: 5000 });
                 const data = response.data.data;
-                
-                if (response.data.status === 'ok') {
-                    // Update Memory (aqi can be "-" when unavailable)
-                    aqiStorage.value = (typeof data.aqi === 'number') ? data.aqi : "N/A";
-                    // Safe check for pollutants
+
+                if (response.data.status === 'ok' && typeof data.aqi === 'number') {
+                    aqiStorage.value = data.aqi;
                     aqiStorage.pm25 = (data.iaqi && data.iaqi.pm25) ? data.iaqi.pm25.v : "N/A";
                     aqiStorage.pm10 = (data.iaqi && data.iaqi.pm10) ? data.iaqi.pm10.v : "N/A";
                     aqiStorage.co = (data.iaqi && data.iaqi.co) ? data.iaqi.co.v : "N/A";
                     aqiStorage.no2 = (data.iaqi && data.iaqi.no2) ? data.iaqi.no2.v : "N/A";
                     aqiStorage.lastFetch = now;
-                    console.log(`✅ AQI Updated: ${aqiStorage.value}`);
+                    fetched = true;
+                    console.log(`✅ AQI Updated from primary station: ${aqiStorage.value}`);
                 } else {
-                    console.log("⚠️ API responded but status not ok:", response.data);
+                    console.log("⚠️ Primary station AQI unavailable, trying nearby...");
                 }
             } catch (err) {
-                console.error("⚠️ Failed to update AQI:", err.message);
+                console.error("⚠️ Primary station failed:", err.message);
+            }
+
+            // Fallback: nearest station by geo coordinates
+            if (!fetched) {
+                try {
+                    const response = await axios.get(`https://api.waqi.info/feed/geo:${LAT};${LON}/?token=${WAQI_TOKEN}`, { timeout: 5000 });
+                    const data = response.data.data;
+
+                    if (response.data.status === 'ok' && typeof data.aqi === 'number') {
+                        aqiStorage.value = data.aqi;
+                        aqiStorage.pm25 = (data.iaqi && data.iaqi.pm25) ? data.iaqi.pm25.v : "N/A";
+                        aqiStorage.pm10 = (data.iaqi && data.iaqi.pm10) ? data.iaqi.pm10.v : "N/A";
+                        aqiStorage.co = (data.iaqi && data.iaqi.co) ? data.iaqi.co.v : "N/A";
+                        aqiStorage.no2 = (data.iaqi && data.iaqi.no2) ? data.iaqi.no2.v : "N/A";
+                        aqiStorage.lastFetch = now;
+                        console.log(`✅ AQI Updated from nearby station (${data.city?.name}): ${aqiStorage.value}`);
+                    } else {
+                        console.log("⚠️ Nearby station also unavailable");
+                    }
+                } catch (err) {
+                    console.error("⚠️ Nearby station fallback failed:", err.message);
+                }
             }
         } else {
             console.log("💾 Serving AQI from Cache");

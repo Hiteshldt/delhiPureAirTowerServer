@@ -70,8 +70,8 @@ app.get('/api/aqi', async (req, res) => {
                 const data = response.data.data;
                 
                 if (response.data.status === 'ok') {
-                    // Update Memory
-                    aqiStorage.value = data.aqi;
+                    // Update Memory (aqi can be "-" when unavailable)
+                    aqiStorage.value = (typeof data.aqi === 'number') ? data.aqi : "N/A";
                     // Safe check for pollutants
                     aqiStorage.pm25 = (data.iaqi && data.iaqi.pm25) ? data.iaqi.pm25.v : "N/A";
                     aqiStorage.pm10 = (data.iaqi && data.iaqi.pm10) ? data.iaqi.pm10.v : "N/A";
